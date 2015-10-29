@@ -2,7 +2,10 @@
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/clojurescript "0.0-3211"]
                  [reagent "0.5.0"]
-                 [re-frame "0.4.1"]]
+                 [re-frame "0.4.1"]
+                 [prismatic/schema "0.4.3"]
+                 [domina "1.0.3"]
+                 [org.clojure/core.async "0.2.371"]]
 
   :source-paths ["src/clj"]
 

@@ -3,7 +3,10 @@
               [re-frame.core :as re-frame]
               [re-frogger.handlers]
               [re-frogger.subs]
-              [re-frogger.views :as views]))
+              [re-frogger.views :as views]
+              ))
+
+(enable-console-print!)
 
 (defn mount-root []
   (reagent/render [views/main-panel]
