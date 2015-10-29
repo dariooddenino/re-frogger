@@ -16,18 +16,18 @@
   (let [frame (subscribe [:frame])]
     [:h2 "time:" (int (/ @frame 3))]))
 
-(defn game-over []
-  (let [game-over (subscribe [:game-over])]
-    (when @game-over
-      [:button {:on-click #(dispatch-sync [:initialize-db])} "GAME OVER - PRESS TO RESTART"])))
-
 (defn tile [index]
   [:div {:class "tile"}])
 
-(defn lane [lane-type]
-  [:div {:class (str "lane " "type" lane-type)}
+(defn lane []
+  [:div {:class "lane"}
    (for [i (range 15)]
     ^{:key i} [tile i])])
+
+(defn lanes [lanes]
+  [:div
+   (for [i (range 11)]
+     ^{:key i} [lane])])
 
 
 (defn player []
@@ -37,11 +37,37 @@
                    :left (* (:x @position) 22)}}]))
 
 (defn- bind-keys [_]
-  (ev/listen! (css/sel "body") :keypress #(dispatch [:move-player (:keyCode %)])))
+  (ev/listen! (css/sel "body") :keypress #(dispatch [:handle-keyboard (:keyCode %)])))
 
 (defn- unbind-keys [_]
   (ev/unlisten! (css/sel "body") :keypress))
 
+(defn game-over []
+  (let [game-over (subscribe [:game-over])]
+    (if @game-over
+      [:h3 {:class "gameover"} 
+       "GAME-OVER - PRESS R TO RESTART"])))
+
+(defn car [car]
+  [:div {:class (str "car " "model" (:s car))
+         :style {:top (* (:y car) 22)
+                 :left (* (:x car) 22)}}])
+
+(defn traffic []
+  (let [cars (subscribe [:cars])
+        real-cars @cars] ;; lazy reactive blah blah why? @TODO!
+  [:div {:class "traffic"}
+     (for [i (range (count real-cars))]
+       ^{:key i} [car (nth real-cars i)])]))
+
+(defn world []
+  (let [frame (subscribe [:frame])]
+    (when @frame
+      (do
+        (dispatch [:update-position])
+        (dispatch [:update-traffic])
+        (dispatch [:generate-cars])
+        (dispatch [:check-collisions])))))
 
 (defn board []
   (let [lane-types (subscribe [:lane-types])]
@@ -51,17 +77,20 @@
                            :reagent-render 
                            (fn []
                              [:div {:class "board"}
-                              [player]
-                              (for [lane-type @lane-types]
-                                [lane lane-type])])})))
-
-
+                              [world]                   
+                              [game-over]
+                              [traffic]
+                              [player]                              
+                              [lanes @lane-types]])})))
+    
 (defn time-loop []
-  (go-loop [game-over (subscribe [:game-over])]
-    (<! (timeout 333))
-    (when-not @game-over
-      (dispatch [:frame]))
-    (recur game-over)))
+  (let [running (subscribe [:running])]
+    (if-not @running
+      (do (dispatch [:start-game])
+          (go-loop [game-over (subscribe [:game-over])]
+            (<! (timeout 333))
+            (dispatch [:frame])
+            (recur game-over))))))
 
 (defn main-panel []
   (let [name (subscribe [:name])]
@@ -71,6 +100,5 @@
        [:h1 @name]
        [score]
        [frame]
-       [board]
-       [game-over]])))
+       [board]])))
 

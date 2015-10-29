@@ -31,3 +31,13 @@
  :frame
  (fn [db]
    (reaction (-> @db :game-state :frame))))
+
+(register-sub
+ :running
+ (fn [db]
+   (reaction (-> @db :game-state :running))))
+
+(register-sub
+ :cars
+ (fn [db]
+   (reaction (-> @db :game-state :cars))))
