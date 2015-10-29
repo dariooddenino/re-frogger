@@ -3,13 +3,18 @@
               [domina :as d]
               [domina.events :as ev]
               [domina.css :as css]
-              [cljs.core.async :refer [<! chan put! timeout]])
+              [reagent.core :as reagent]
+              [cljs.core.async :refer [<! chan put! timeout pub sub]])
     (:require-macros [cljs.core.async.macros :refer [go-loop go]]))
 
 (defn score []
   (let [score (subscribe [:score])]
     (fn []
       [:h2 "score: " @score])))
+
+(defn frame []
+  (let [frame (subscribe [:frame])]
+    [:h2 "time:" (int (/ @frame 3))]))
 
 (defn game-over []
   (let [game-over (subscribe [:game-over])]
@@ -31,35 +36,41 @@
            :style {:top (* (:y @position) 22)
                    :left (* (:x @position) 22)}}]))
 
-(defn board []
-  (let [lane-types (subscribe [:lane-types])]
-    (fn []
-      [:div {:class "board"}
-       [player]
-       (for [lane-type @lane-types]
-         [lane lane-type])])))
-
 (defn- bind-keys [_]
   (ev/listen! (css/sel "body") :keypress #(dispatch [:move-player (:keyCode %)])))
 
 (defn- unbind-keys [_]
   (ev/unlisten! (css/sel "body") :keypress))
 
-;; (defn time-loop []
-;;   (let [game-over (subscribe [:game-over])]
-;;     (when-not game-over
-;;       (go
-;;         (<! (timeout 30))
-;;         (println "frame!")))))
-;; something like thi, bbut working!
+
+(defn board []
+  (let [lane-types (subscribe [:lane-types])]
+    (reagent/create-class {:component-did-mount bind-keys
+                           :component-will-unmount unbind-keys
+                           :display-name "board"
+                           :reagent-render 
+                           (fn []
+                             [:div {:class "board"}
+                              [player]
+                              (for [lane-type @lane-types]
+                                [lane lane-type])])})))
+
+
+(defn time-loop []
+  (go-loop [game-over (subscribe [:game-over])]
+    (<! (timeout 333))
+    (when-not @game-over
+      (dispatch [:frame]))
+    (recur game-over)))
 
 (defn main-panel []
   (let [name (subscribe [:name])]
     (fn []
+      (time-loop)
       [:div
        [:h1 @name]
        [score]
-       [game-over]
-       [(with-meta board {:component-did-mount bind-keys
-                          :component-will-unmount unbind-keys})]])))
+       [frame]
+       [board]
+       [game-over]])))
 

@@ -26,3 +26,8 @@
  :position
  (fn [db]
    (reaction (-> @db :game-state :position))))
+
+(register-sub
+ :frame
+ (fn [db]
+   (reaction (-> @db :game-state :frame))))

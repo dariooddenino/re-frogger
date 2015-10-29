@@ -9,6 +9,15 @@
     width: 100%;
 }
 
+h2 {
+    float: left;
+    margin-right: 5px;
+}
+
+.board {
+    clear: left;
+}
+
 .tile {
     height: 20px;
     width: 20px;

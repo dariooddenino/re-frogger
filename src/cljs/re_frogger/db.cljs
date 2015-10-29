@@ -8,6 +8,7 @@
   {:name "re-frogger"
    :game-state {
                 :running false
+                :frame 0
                 :score 0
                 :game-over false
                 :lane-types [1 1 1 1 1 1 1 1 1 1 0]

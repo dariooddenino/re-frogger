@@ -43,6 +43,12 @@
        db))))
 
 (register-handler
+ :frame
+ (fn [db [_ _]]
+   (let [frame (-> db :game-state :frame)]
+     (assoc-in db [:game-state :frame] (inc frame)))))
+
+(register-handler
  :check-game-over
  (fn [db [_ score]]
    (if (= score 10)
