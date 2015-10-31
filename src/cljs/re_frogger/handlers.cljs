@@ -1,5 +1,5 @@
 (ns re-frogger.handlers
-    (:require [re-frame.core :refer [register-handler dispatch] :as re-frame]
+    (:require [re-frame.core :refer [register-handler dispatch path] :as re-frame]
               [re-frogger.db :as db]))
 
 (register-handler
@@ -12,6 +12,8 @@
 (def DOWN 115)
 (def LEFT 97)
 (def RBUTTON 114)
+
+(def game-state-mw [(path :game-state)])
 
 (defn- new-position [position move]
   (condp = move
@@ -47,36 +49,41 @@
 
 (register-handler
  :update-position
- (fn [db [_ _]]
-   (let [next-position (-> db :game-state :next-position)]
-     (assoc-in db [:game-state :position] next-position))))
+ game-state-mw
+ (fn [gs [_ _]]
+   (let [next-position (:next-position gs)]
+     (assoc gs :position next-position))))
 
 (register-handler
  :frame
- (fn [db [_ _]]
-   (let [frame (-> db :game-state :frame)]
-     (assoc-in db [:game-state :frame] (inc frame)))))
+ game-state-mw
+ (fn [gs [_ _]]
+   (let [frame (:frame gs)]
+     (assoc gs :frame (inc frame)))))
 
 (register-handler
  :check-game-over
- (fn [db [_ score]]
+ game-state-mw
+ (fn [gs [_ score]]
    (if (= score 10)
-     (assoc-in db [:game-state :game-over] true)
-     db)))
+     (assoc gs :game-over true)
+     gs)))
 
 (register-handler
  :update-score
- (fn [db [_ position]]
+ game-state-mw
+ (fn [gs [_ position]]
    (let [score (- 10 position)]
      (dispatch [:check-game-over score])
-     (if (> score (-> db :game-state :score))
-       (assoc-in db [:game-state :score] score)
-       db))))
+     (if (> score (:score gs))
+       (assoc gs :score score)
+       gs))))
 
 (register-handler
  :start-game
- (fn [db [_ _]]
-   (assoc-in db [:game-state :running] true)))
+ game-state-mw
+ (fn [gs [_ _]]
+   (assoc gs :running true)))
 
 (defn- update-car [car]
   (if (:d car)
@@ -99,21 +106,23 @@
 
 (register-handler
  :update-traffic
- (fn [db [_ _]]
-   (let [cars (-> db :game-state :cars)
-         frame (-> db :game-state :frame)]
-     (assoc-in db [:game-state :cars] (filter not-nil? (update-traffic cars frame))))))
+ game-state-mw
+ (fn [gs [_ _]]
+   (let [cars (:cars gs)
+         frame (:frame gs)]
+     (assoc gs :cars (filter not-nil? (update-traffic cars frame))))))
 
 (register-handler 
  :check-collisions
- (fn [db [_ _]]
-   (let [cars (-> db :game-state :cars)
-         pos (-> db :game-state :position)]
+ game-state-mw
+ (fn [gs [_ _]]
+   (let [cars (:cars gs)
+         pos (:position gs)]
      (if (some #(and (= (:x %) (:x pos))
                      (= (:y %) (:y pos)))
                cars)
-       (assoc-in db [:game-state :game-over] true)
-       db))))
+       (assoc gs :game-over true)
+       gs))))
 
 (defn rand-speed []
   (int (inc (rand 3))))
@@ -126,10 +135,10 @@
 
 (register-handler
  :generate-cars
- (fn [db [_ _]]
-   ;; Creates a car per side
-   (let [cars (-> db :game-state :cars)
-         frame (-> db :game-state :frame)]
+ game-state-mw
+ (fn [gs [_ _]]
+   (let [cars (-> gs :cars)
+         frame (-> gs :frame)]
      (if (= 0 (mod frame 3))
-       (assoc-in db [:game-state :cars] (new-cars cars))
-       db))))
+       (assoc gs :cars (new-cars cars))
+       gs))))

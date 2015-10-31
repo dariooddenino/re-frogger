@@ -21,17 +21,3 @@
                        {:x 15 :y 1 :s 1}]
                 :next-position {:x 7 :y 10}
                 :position {:x 7 :y 10}}})
-
-;; -- Db schema TODO: add validations
-
-(def schema {;; App name
-             :name s/Str
-             ;; Game state
-             :game-state {;; Is the game running?
-                          :running s/Bool
-                          ;; The current score
-                          :score s/Int}})
-
-;; -- Local Storage
-
-(def lsk "re-frogger")

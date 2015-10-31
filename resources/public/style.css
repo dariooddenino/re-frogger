@@ -18,6 +18,23 @@ h2 {
     position: absolute;
     top: 50%;
     color: red;
+    z-index: 3;
+}
+
+.gameover-enter {
+    opacity: 0;
+    transition: opacity 1s ease-in;
+    -webkit-transition: opacity 3s ease-in;
+}
+
+.gameover-leave {
+    opacity: 0;
+    transition: opacity 1s ease-in;
+    -webkit-transition: opacity 3s ease-in;
+}
+
+.gameover-enter-active {
+    opacity: 1;
 }
 
 .board {

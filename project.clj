@@ -1,11 +1,13 @@
 (defproject re-frogger "0.1.0-SNAPSHOT"
-  :dependencies [[org.clojure/clojure "1.6.0"]
-                 [org.clojure/clojurescript "0.0-3211"]
-                 [reagent "0.5.0"]
+  :dependencies [[org.clojure/clojure "1.7.0"]
+                 [org.clojure/clojurescript "1.7.122"]
+                 [reagent "0.5.1" :exclusions [cljsjs/react]]
+                 [cljsjs/react-with-addons "0.13.3-0"]
                  [re-frame "0.4.1"]
                  [prismatic/schema "0.4.3"]
                  [domina "1.0.3"]
-                 [org.clojure/core.async "0.2.371"]]
+                 [org.clojure/core.async "0.2.371"]
+                 [binaryage/devtools "0.4.0"]]
 
   :source-paths ["src/clj"]
 
