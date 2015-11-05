@@ -7,16 +7,17 @@
                  [prismatic/schema "0.4.3"]
                  [domina "1.0.3"]
                  [org.clojure/core.async "0.2.371"]
-                 [binaryage/devtools "0.4.0"]]
+                 [binaryage/devtools "0.4.0"]
+                 [timothypratley/reanimated "0.1.1"]]
 
   :source-paths ["src/clj"]
 
   :plugins [[lein-cljsbuild "1.0.6"]
             [lein-figwheel "0.3.3" :exclusions [cider/cider-nrepl]]  ]
 
-  :clean-targets ^{:protect false} ["resources/public/js/compiled" "target" 
+  :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"
                                     "test/js" ]
-  
+
   :cljsbuild {:builds [{:id "dev"
                         :source-paths ["src/cljs"]
 
